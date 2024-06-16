@@ -1,0 +1,66 @@
+https://medium.com/@dheerajbesu/create-streamlit-as-desktop-app-54bb843974f3
+https://ploomber.io/blog/streamlit_exe/
+
+1. pip install pyinstaller
+
+2. wrapper run.py
+import streamlit
+
+import streamlit.web.cli as stcli
+import os, sys
+
+
+def resolve_path(path):
+    resolved_path = os.path.abspath(os.path.join(os.getcwd(), path))
+    return resolved_path
+
+
+if __name__ == "__main__":
+    sys.argv = [
+        "streamlit",
+        "run",
+        resolve_path("streamlit_app.py"),
+        "--global.developmentMode=false",
+    ]
+    sys.exit(stcli.main())
+
+3. Hooks file ./hooks/hook-streamlit.py:
+from PyInstaller.utils.hooks import copy_metadata
+
+datas = copy_metadata("streamlit")
+
+4. Generate build, dist, .spec
+pyinstaller --onefile --additional-hooks-dir=./hooks run.py --clean
+
+5. Edit run.spec
+from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import copy_metadata
+
+datas = [("{$YOURPYTHONENV}/site-packages/streamlit/runtime", "./streamlit/runtime")]
+datas += collect_data_files("streamlit")
+datas += copy_metadata("streamlit")
+
+
+block_cipher = None
+
+
+a = Analysis(
+    ["run.py"],
+    pathex=["."],
+    binaries=[],
+    datas=datas,
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+pyz = PYZ(...)
+exe = EXE(...)
+coll = COLLECT(...)
+
+5. pyinstaller run.spec --clean
