@@ -1,0 +1,65 @@
+Steps are based on these links:
+https://medium.com/@dheerajbesu/create-streamlit-as-desktop-app-54bb843974f3
+https://ploomber.io/blog/streamlit_exe/
+
+Steps to create a package from scratch:
+** TO BE VERIFIED AND UPDATED AFTER TESTING ON BOTH MAC AND WINDOWS **
+
+1. pip install pyinstaller
+
+2. Create wrapper file run.py in the top level dir:
+
+import os
+import subprocess
+
+if __name__ == "__main__":
+    try:
+        subprocess.run(['streamlit', 'run', './src/converter.py'])
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+
+3. Create hooks file ./hooks/hook-streamlit.py:
+
+from PyInstaller.utils.hooks import copy_metadata
+datas = copy_metadata("streamlit")
+
+4. Generate build, dist, .spec files:
+pyinstaller --onefile --additional-hooks-dir=./hooks run.py --clean
+
+5. Edit run.spec - replace Analysis object with this.
+And replace '/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/'
+with your python path.
+
+a = Analysis(
+    ['run.py'],
+    pathex=[],
+    binaries=[],
+    datas=[
+        (
+            "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/streamlit",
+            "./streamlit"
+        ),
+        (
+            "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages",
+            "."
+        ),
+        (
+            "./src",
+            "./src"
+        )
+    ],
+    hiddenimports=[
+        "streamlit"
+    ],
+    hookspath=['./hooks'],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=False,
+    noarchive=False,
+)
+
+6. Run command:
+pyinstaller run.spec --clean
