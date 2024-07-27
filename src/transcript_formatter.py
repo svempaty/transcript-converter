@@ -9,7 +9,8 @@ class TranscriptFormatter:
 
     def __init__(self, vtt_text):
         logging.info('Initializing TranscriptFormatter')
-        self.vtt = vtt_text
+        # Normalize line endings
+        self.vtt = vtt_text.replace('\r\n', '\n').replace('\r', '\n')
         self.lines = None
         self.block = None
         self.paragraphs = None
