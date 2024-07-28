@@ -1,18 +1,26 @@
 import os
-import subprocess
+import streamlit
+import streamlit.web.cli as stcli
 import sys
 
-# Determine the path to the directory containing the script
-if getattr(sys, 'frozen', False):
-    # If running from a PyInstaller bundle
-    script_dir = sys._MEIPASS
-else:
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+def resolve_script_path():
+    if getattr(sys, 'frozen', False):
+        print('Running in a bundle')
+        script_dir = sys._MEIPASS
+    else:
+        print('Running in normal Python environment')
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_path = os.path.join(script_dir, 'src/converter.py')
+    print(f'Script path: {script_path}')
+    return script_path
 
-if __name__ == "__main__":
-    test_script_path = os.path.join(script_dir, './src/converter.py')
-
-    try:
-        subprocess.run(['streamlit', 'run', test_script_path])
-    except Exception as e:
-        print(f"Exception occurred: {e}")
+if __name__ == '__main__':
+    print('In run.py')
+    script_path = resolve_script_path()
+    sys.argv = [
+        'streamlit',
+        'run',
+        script_path,
+        '--global.developmentMode=false'
+    ]
+    sys.exit(stcli.main())

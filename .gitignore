@@ -1,4 +1,7 @@
+# Mac system files
 .DS_Store
+
+# PyInstaller generated dirs when creating a dist or executable
 build/
 dist/
 __pycache__/
