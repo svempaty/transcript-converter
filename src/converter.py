@@ -3,8 +3,9 @@
 import logging
 import streamlit as st
 from io import StringIO
-import pypandoc
+from pathlib import Path
 from transcript_formatter import TranscriptFormatter
+import utils
 
 FILE_EXT = '.txt'
 FILE_SUFFIX_LINES = '_lines'
@@ -12,7 +13,7 @@ FILE_SUFFIX_BLOCK = '_block'
 FILE_SUFFIX_PARA = '_para'
 
 def convert(file_suffix, format_func, container):
-    filename = st.session_state.base_filename + file_suffix + FILE_EXT
+    filename = st.session_state.filename_stem + file_suffix + FILE_EXT
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(format_func())
     container.write('Downloaded file {f}'.format(f=filename))
@@ -44,12 +45,13 @@ if 'vtt_file_changed' in st.session_state and st.session_state.vtt_file_changed:
     # Read file contents into string
     print(st.session_state.vtt_file)
     filename = st.session_state.vtt_file.name
-    if filename.rsplit('.')[-1] == 'docx':
-        vtt_text = pypandoc.convert_file(filename, 'plain', format='docx')
+    suffix = Path(filename).suffix
+    if suffix == '.docx':
+        vtt_text = utils.docx_file_to_txt_str(st.session_state.vtt_file)
     else:
         stringio = StringIO(st.session_state.vtt_file.getvalue().decode('utf-8'))
         vtt_text = stringio.read()
-    st.session_state.base_filename = filename.split('.')[0]
+    st.session_state.filename_stem = filename.rstrip(''.join(Path(filename).suffixes))
     st.session_state.tf = TranscriptFormatter(vtt_text)
     st.session_state.vtt_file_changed = False
 

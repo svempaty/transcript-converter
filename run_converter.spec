@@ -15,13 +15,14 @@ a = Analysis(
     binaries=[],
     datas=[
         ('src/converter.py', 'src'),
-        ('src/transcript_formatter.py', 'src')
+        ('src/transcript_formatter.py', 'src'),
+        ('src/utils.py', 'src')
     ],
-    hiddenimports=['pypandoc'],
+    hiddenimports=['docx'],
     hookspath=['.'],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['tkinter', 'numpy', 'pandas', 'IPython', 'jedi', 'pyarrow', 'PIL', 'altair'],
     noarchive=False,
 )
 pyz = PYZ(a.pure)
